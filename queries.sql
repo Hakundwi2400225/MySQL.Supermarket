@@ -316,8 +316,64 @@ BEGIN
 END
 //
 
+-- TRANSACTION
+CREATE TRIGGER transactions_after_insert
+AFTER INSERT ON Transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO Transactions_Audit (transactionID, action, action_time, customerID, employeeID, TransactionDate, TotalAmount)
+    VALUES (NEW.transactionID, 'INSERT', CONVERT_TZ(NOW(), @@session.time_zone, '+02:00'), NEW.customerID, NEW.employeeID, STR_TO_DATE(NEW.TransactionDate, '%Y-%m-%d'), NEW.TotalAmount);
+END
+//
+
+CREATE TRIGGER transactions_after_update
+AFTER UPDATE ON Transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO Transactions_Audit (transactionID, action, action_time, customerID, employeeID, TransactionDate, TotalAmount)
+    VALUES (NEW.transactionID, 'UPDATE', CONVERT_TZ(NOW(), @@session.time_zone, '+02:00'), NEW.customerID, NEW.employeeID, STR_TO_DATE(NEW.TransactionDate, '%Y-%m-%d'), NEW.TotalAmount);
+END
+//
+
+CREATE TRIGGER transactions_after_delete
+AFTER DELETE ON Transactions
+FOR EACH ROW
+BEGIN
+    INSERT INTO Transactions_Audit (transactionID, action, action_time, customerID, employeeID, TransactionDate, TotalAmount)
+    VALUES (OLD.transactionID, 'DELETE', CONVERT_TZ(NOW(), @@session.time_zone, '+02:00'), OLD.customerID, OLD.employeeID, STR_TO_DATE(OLD.TransactionDate, '%Y-%m-%d'), OLD.TotalAmount);
+END
+//
+-- TRANSACTION DETALS TRIGGER
+
+CREATE TRIGGER transactionDetails_after_insert
+AFTER INSERT ON TransactionDetails
+FOR EACH ROW
+BEGIN
+    INSERT INTO TransactionDetails_Audit (transactionID, productID, action, action_time, quantity, subtotal)
+    VALUES (NEW.transactionID, NEW.productID, 'INSERT', CONVERT_TZ(NOW(), @@session.time_zone, '+02:00'), NEW.quantity, NEW.subtotal);
+END
+//
+
+CREATE TRIGGER transactionDetails_after_update
+AFTER UPDATE ON TransactionDetails
+FOR EACH ROW
+BEGIN
+    INSERT INTO TransactionDetails_Audit (transactionID, productID, action, action_time, quantity, subtotal)
+    VALUES (NEW.transactionID, NEW.productID, 'UPDATE', CONVERT_TZ(NOW(), @@session.time_zone, '+02:00'), NEW.quantity, NEW.subtotal);
+END
+//
+
+CREATE TRIGGER transactionDetails_after_delete
+AFTER DELETE ON TransactionDetails
+FOR EACH ROW
+BEGIN
+    INSERT INTO TransactionDetails_Audit (transactionID, productID, action, action_time, quantity, subtotal)
+    VALUES (OLD.transactionID, OLD.productID, 'DELETE', CONVERT_TZ(NOW(), @@session.time_zone, '+02:00'), OLD.quantity, OLD.subtotal);
+END
+//
+
 DELIMITER ;
 
 
 
-
+  
